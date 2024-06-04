@@ -7,10 +7,15 @@ const App: React.FC = () => {
   const [value, setValue] = useState("");
   const [category, setCategory] = useState<"user" | "repo">("user");
   const [data, setData] = useState<UserData | RepoData | null>(null);
-  const [apiError, setApiError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!value.trim()) {
+      setError("Введите имя пользователя GitHub или название репозитория");
+      return;
+    }
     const apiUrl =
       category === "user"
         ? `https://api.github.com/users/${value}`
@@ -19,10 +24,10 @@ const App: React.FC = () => {
     try {
       const response = await axios.get(apiUrl);
       setData(response.data);
-      setApiError(null);
+      setError(null);
     } catch (error) {
       setData(null);
-      setApiError(
+      setError(
         "Не удалось получить данные. Пожалуйста, проверьте ввод и попробуйте снова."
       );
     }
@@ -45,7 +50,7 @@ const App: React.FC = () => {
         <TypeSelect setCategory={setCategory} category={category} />
         <button type="submit">Поиск</button>
       </form>
-      {apiError && <p>{apiError}</p>}
+      {error && <p>{error}</p>}
       {data &&
         (category === "user" ? (
           <UserInfo data={data as UserData} />
